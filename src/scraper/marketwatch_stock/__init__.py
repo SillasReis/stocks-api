@@ -68,7 +68,7 @@ class MarketWatchStockScraper:
 
             response[mapped_period] = float(performance.text[0:-1])
         
-        return StockPerformance(**response)
+        return StockPerformance.model_validate(response)
 
     def get_stock_competitors(self) -> list[StockCompetitor]:
         response = []
@@ -96,4 +96,4 @@ class MarketWatchStockScraper:
                 }
             })
         
-        return [StockCompetitor(**r) for r in response]
+        return [StockCompetitor.model_validate(r) for r in response]

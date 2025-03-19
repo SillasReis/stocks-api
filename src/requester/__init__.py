@@ -3,6 +3,7 @@ import urllib3
 import requests
 import structlog
 from requests.adapters import HTTPAdapter
+from requests.exceptions import HTTPError
 from requests.packages.urllib3.util.retry import Retry
 
 from src.config import Config
@@ -25,7 +26,7 @@ class Requester:
             session = requests.Session()
 
         retries = Retry(
-            total=self.config.RETRY_MAX,
+            total=self.config.REQUESTER_RETRY_MAX,
             backoff_factor=1,
             status_forcelist=[429, 500, 502, 503, 504],
         )
@@ -46,10 +47,10 @@ class Requester:
     def __submit_request(self, prepped, session):
         rspns = session.send(
             prepped,
-            timeout=self.config.TIMEOUT,
-            allow_redirects=self.config.ALLOW_REDIRECTS,
-            verify=self.config.VERIFY,
-            stream=self.config.STREAM,
+            timeout=self.config.REQUESTER_TIMEOUT,
+            allow_redirects=self.config.REQUESTER_ALLOW_REDIRECTS,
+            verify=self.config.REQUESTER_VERIFY,
+            stream=self.config.REQUESTER_STREAM,
         )
         logger.debug('response', status_code=rspns.status_code, response=rspns.text)
         return rspns
