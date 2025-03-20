@@ -20,6 +20,8 @@ class Config(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
 
+    STOCK_DAILY_INFO_MAX_ATTEMPTS: int = 5
+
     model_config = SettingsConfigDict(
         env_file=('.env'),
         extra='ignore',

@@ -1,3 +1,4 @@
+from decimal import Decimal
 import re
 
 from bs4 import BeautifulSoup
@@ -31,10 +32,10 @@ class MarketWatchStockScraper:
     @staticmethod
     def __convert_market_value(value: str) -> float:
         multipliers = {
-            'T': 1e12,
-            'B': 1e9,
-            'M': 1e6,
-            'K': 1e3
+            'T': Decimal(1e12),
+            'B': Decimal(1e9),
+            'M': Decimal(1e6),
+            'K': Decimal(1e3)
         }
 
         value = value.strip()
@@ -43,8 +44,8 @@ class MarketWatchStockScraper:
         if suffix not in multipliers:
             return float(value)
 
-        number = float(value[:-1])
-        return number * multipliers[suffix]
+        number = Decimal(value[:-1])
+        return float(number * multipliers[suffix])
 
     def get_stock_performance(self) -> StockPerformance:
         response = {}
@@ -97,3 +98,11 @@ class MarketWatchStockScraper:
             })
         
         return [StockCompetitor.model_validate(r) for r in response]
+
+    def get_stock_company_name(self) -> str:
+        company_name = self.stock_page_content.find("h1", {"class": "company__name"})
+        
+        if not company_name:
+            raise Exception("Stock company name not found")
+
+        return company_name.text
