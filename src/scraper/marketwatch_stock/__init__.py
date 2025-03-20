@@ -2,9 +2,13 @@ from decimal import Decimal
 import re
 
 from bs4 import BeautifulSoup
+import structlog
 
 from src.requester import Requester
 from src.scraper.marketwatch_stock.schema import StockPerformance, StockCompetitor
+
+
+logger = structlog.get_logger("scraper.marketwatch_stock")
 
 
 class MarketWatchStockScraper:
@@ -77,7 +81,8 @@ class MarketWatchStockScraper:
         try:
             competitors = self.stock_page_content.find("table", {"aria-label": "Competitors data table"}).find("tbody").find_all("tr")
         except AttributeError:
-            raise Exception("Stock competitors table not found")
+            competitors = []
+            logger.info("Stock competitors table not found")
 
         for competitor in competitors:
             name = competitor.find("a")
