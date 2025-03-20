@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -36,6 +37,10 @@ class StockCompetitorsMarketCapResponse(BaseSchema):
 class StockCompetitorResponse(BaseSchema):
     name: str
     market_cap: StockCompetitorsMarketCapResponse
+
+
+class StockPurchaseRequest(BaseSchema):
+    amount: Decimal = Field(..., description="Amount to purchase", decimal_places=2)
 
 
 class StockResponse(BaseSchema):

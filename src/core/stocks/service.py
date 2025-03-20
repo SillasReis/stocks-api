@@ -1,9 +1,11 @@
 from datetime import date, timedelta
+from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
 from src.config import Config
-from src.core.stocks.exception import StockNotFound
+from src.core.stocks.exception import InvalidPurchaseAmount, StockNotFound
+from src.core.stocks.model import Stock
 from src.core.stocks.repository import StockRepository
 from src.core.stocks.schema import StockResponse
 from src.polygon import Polygon
@@ -53,7 +55,7 @@ class StockService:
         response = StockResponse.model_validate({
             "status": stock_daily_info.status,
             "purchased_amount": stock_record.purchased_amount if stock_record else 0,
-            # "purchased_status": "???",
+            # "purchased_status": "???",  # TODO: REMOVE
             "request_data": from_date,
             "company_code": symbol,
             "company_name": company_name,
@@ -63,3 +65,21 @@ class StockService:
         }, from_attributes=True)
 
         return response
+    
+    def purchase(self, symbol: str, amount: Decimal) -> Decimal:
+        symbol = symbol.upper()
+        stock_record = self.repository.get_by_symbol(symbol)
+
+        if stock_record:
+            purchased_amount = round(Decimal(stock_record.purchased_amount) + amount, 2)
+            
+            if purchased_amount < 0:
+                raise InvalidPurchaseAmount
+            
+            self.repository.update_by_symbol(symbol, {"purchased_amount": purchased_amount})
+            return purchased_amount
+        else:
+            StockService.__get_last_valid_stock_daily_info(symbol)
+            amount = round(amount, 2)
+            self.repository.add(Stock(symbol=symbol, purchased_amount=amount))
+            return amount
