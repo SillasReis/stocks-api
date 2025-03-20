@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
+from src.cacher import Cacher
 from src.config import Config
 from src.core.stocks.exception import InvalidPurchaseAmount, StockNotFound
 from src.core.stocks.model import Stock
@@ -20,6 +21,7 @@ config = Config()
 class StockService:
     def __init__(self, session: Session):
         self.repository = StockRepository(session)
+        self.cacher = Cacher("stocks")
 
     @staticmethod
     def __get_last_valid_stock_daily_info(stock_symbol: str) -> tuple[date, StockDailyInfo]:
@@ -43,6 +45,10 @@ class StockService:
     def get(self, symbol: str) -> StockResponse:
         symbol = symbol.upper()
 
+        cached_response = self.cacher.get(symbol)
+        if cached_response:
+            return StockResponse.model_validate(cached_response)
+
         from_date, stock_daily_info = StockService.__get_last_valid_stock_daily_info(symbol)
 
         market_watch_scraper = MarketWatchStockScraper(symbol)
@@ -64,9 +70,11 @@ class StockService:
             "competitors": competitors
         }, from_attributes=True)
 
+        self.cacher.set(symbol, response.model_dump_json(), config.CACHE_TTL_SECONDS)
+
         return response
     
-    def purchase(self, symbol: str, amount: Decimal) -> Decimal:
+    def purchase(self, symbol: str, amount: Decimal) -> None:
         symbol = symbol.upper()
         stock_record = self.repository.get_by_symbol(symbol)
 
@@ -77,9 +85,9 @@ class StockService:
                 raise InvalidPurchaseAmount
             
             self.repository.update_by_symbol(symbol, {"purchased_amount": purchased_amount})
-            return purchased_amount
         else:
             StockService.__get_last_valid_stock_daily_info(symbol)
             amount = round(amount, 2)
             self.repository.add(Stock(symbol=symbol, purchased_amount=amount))
-            return amount
+        
+        self.cacher.delete(symbol)

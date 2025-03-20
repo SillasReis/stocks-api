@@ -14,9 +14,21 @@ services:
     restart: always
     networks:
       - stocks-net
+  
+  redis:
+    container_name: stocks-redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+    networks:
+      - stocks-net
 
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   stocks-net:

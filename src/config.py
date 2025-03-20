@@ -18,6 +18,9 @@ class Config(BaseSettings):
     DB_PORT: int
     DB_NAME: str
 
+    REDIS_URL: str
+    CACHE_TTL_SECONDS: int = 3600
+
     LOG_LEVEL: str = "INFO"
 
     STOCK_DAILY_INFO_MAX_ATTEMPTS: int = 5
