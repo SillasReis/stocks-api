@@ -1,4 +1,5 @@
 import json
+import structlog
 
 from redis import Redis
 
@@ -6,10 +7,12 @@ from src.config import Config
 
 
 config = Config()
+logger = structlog.get_logger('cacher')
 
 
 class Cacher:
     def __init__(self, key_prefix: str):
+        logger.debug("Initializing Cacher", key_prefix=key_prefix)
         self.client = Redis.from_url(config.REDIS_URL)
         self.key_prefix = key_prefix
 
@@ -19,7 +22,7 @@ class Cacher:
     def get(self, key: str):
         key = self.__get_key(key)
         result = self.client.get(key)
-        
+        logger.debug("Get from cache", key=key, result=result)
         if result:
             try:
                 return json.loads(result)
@@ -40,6 +43,7 @@ class Cacher:
         else:
             result = self.client.set(key, value)
 
+        logger.debug("Set in cache", key=key, value=value, result=result)
         return result
 
     def delete(self, key: str) -> bool:

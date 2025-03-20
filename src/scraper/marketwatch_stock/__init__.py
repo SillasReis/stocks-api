@@ -57,6 +57,7 @@ class MarketWatchStockScraper:
         try:
             rows = self.stock_page_content.find("table", "table table--primary no-heading c2").find("tbody").find_all("tr")
         except AttributeError:
+            logger.debug("Stock performance table not found", stock_symbol=self.stock_symbol)
             raise Exception("Stock performance table not found")
 
         for row in rows:
@@ -82,7 +83,7 @@ class MarketWatchStockScraper:
             competitors = self.stock_page_content.find("table", {"aria-label": "Competitors data table"}).find("tbody").find_all("tr")
         except AttributeError:
             competitors = []
-            logger.info("Stock competitors table not found")
+            logger.debug("Stock competitors table not found", stock_symbol=self.stock_symbol)
 
         for competitor in competitors:
             name = competitor.find("a")
@@ -108,6 +109,7 @@ class MarketWatchStockScraper:
         company_name = self.stock_page_content.find("h1", {"class": "company__name"})
         
         if not company_name:
+            logger.debug("Stock company name not found", stock_symbol=self.stock_symbol)
             raise Exception("Stock company name not found")
 
         return company_name.text
