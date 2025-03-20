@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import structlog
 
 
 class Config(BaseSettings):
@@ -29,3 +30,8 @@ class Config(BaseSettings):
         env_file=('.env'),
         extra='ignore',
     )
+
+
+config = Config()
+
+structlog.configure(wrapper_class=structlog.make_filtering_bound_logger(config.LOG_LEVEL))
