@@ -2,15 +2,12 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
 class BaseSchema(BaseModel):
     model_config = ConfigDict(
-        populate_by_name=True,
-        json_encoders={
-            date: lambda v: v.strftime('%Y-%m-%d')
-        }
+        populate_by_name=True
     )
 
 
@@ -53,3 +50,7 @@ class StockResponse(BaseSchema):
     stock_values: StockValuesResponse = Field(..., alias="Stock_values")
     performance_data: StockPerformanceResponse
     competitors: list[StockCompetitorResponse] = Field(..., alias="Competitors")
+
+    @field_serializer("request_data")
+    def serialize_date(self, date: date) -> str:
+        return date.strftime('%Y-%m-%d')

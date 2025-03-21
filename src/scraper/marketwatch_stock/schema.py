@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -12,8 +14,8 @@ class StockCompetitor(BaseModel):
 
 
 class StockPerformance(BaseModel):
-    five_days: float
-    one_month: float
-    three_months: float
-    ytd: float
-    one_year: float
+    five_days: Optional[float] = None
+    one_month: Optional[float] = None
+    three_months: Optional[float] = None
+    ytd: Optional[float] = None
+    one_year: Optional[float] = None

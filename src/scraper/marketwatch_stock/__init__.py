@@ -26,6 +26,7 @@ class MarketWatchStockScraper:
     }
 
     def __init__(self, stock_symbol: str):
+        self.stock_symbol = stock_symbol
         self.stock_url = f"{MarketWatchStockScraper.BASE_URL}/investing/stock/{stock_symbol}"
         self.stock_page_content: BeautifulSoup = self.__get_stock_page_content()
 
