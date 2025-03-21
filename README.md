@@ -79,6 +79,9 @@ docker-compose up --build -d
 ```
 The API will be available at `http://localhost:8000`.
 
+4. Access the API documentation:
+* Swagger: [http://localhost:8000/docs](http://localhost:8000/docs)
+* ReDoc: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
 ## 🧪 Running Tests
 
