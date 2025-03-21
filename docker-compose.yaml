@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: stocks-postgres
-    image: postgres:latest
+    image: postgres:17.4
     env_file: ".env"
     environment:
       - POSTGRES_USER=${DB_USER}
@@ -17,7 +17,7 @@ services:
   
   redis:
     container_name: stocks-redis
-    image: redis:latest
+    image: redis:7.4.2
     ports:
       - "6379:6379"
     volumes:
@@ -25,6 +25,20 @@ services:
     restart: always
     networks:
       - stocks-net
+
+  api:
+    build: .
+    container_name: stocks-api
+    image: stocks-api:latest
+    env_file: ".env"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - stocks-net
+    restart: always
 
 volumes:
   postgres_data:
